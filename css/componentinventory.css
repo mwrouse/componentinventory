@@ -5,5 +5,15 @@
 
 .process-icon-view::before {
     content: "\f06e";
-    font-family: "FontAwesome"
+    font-family: "FontAwesome";
+}
+
+.process-icon-dashboard::before {
+    content: "\f0e4";
+    font-family: "FontAwesome";
+}
+
+.process-icon-gear::before {
+    content: "\f013";
+    font-family: "FontAwesome";
 }

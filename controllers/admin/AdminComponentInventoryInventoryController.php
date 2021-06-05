@@ -22,19 +22,27 @@ class AdminComponentInventoryInventoryController extends ModuleAdminController
      */
     public function initPageHeaderToolbar()
     {
+        $this->page_header_toolbar_btn['view_db'] = [
+            'href' => 'index.php?controller=AdminComponentInventoryDashboard&token='.Tools::getAdminTokenLite('AdminComponentInventoryDashboard'),
+            'desc' => $this->l('Dashboard', null, null, false),
+            'icon' => 'process-icon-dashboard',
+        ];
+
         if (empty($this->display) || $this->display =='list') {
             $this->page_header_toolbar_btn['new_part'] = [
                 'href' => static::$currentIndex.'&configure=parts&id=new&update'.$this->table.'&token='.$this->token,
                 'desc' => $this->l('New Part', null, null, false),
                 'icon' => 'process-icon-new',
             ];
+        }
 
-            $this->page_header_toolbar_btn['view_po'] = [
-                'href' => 'index.php?controller=AdminComponentInventoryPurchaseOrders&token='.Tools::getAdminTokenLite('AdminComponentInventoryPurchaseOrders'),
-                'desc' => $this->l('View P.O.s', null, null, false),
-                'icon' => 'process-icon-view',
-            ];
+        $this->page_header_toolbar_btn['view_po'] = [
+            'href' => 'index.php?controller=AdminComponentInventoryPurchaseOrders&token='.Tools::getAdminTokenLite('AdminComponentInventoryPurchaseOrders'),
+            'desc' => $this->l('View P.O.s', null, null, false),
+            'icon' => 'process-icon-view',
+        ];
 
+        if (empty($this->display) || $this->display =='list') {
             $this->page_header_toolbar_btn['new_po'] = [
                 'href' => 'index.php?controller=AdminComponentInventoryPurchaseOrders&configure=po&id=new&update'.$this->module->table_po.'&token='.Tools::getAdminTokenLite('AdminComponentInventoryPurchaseOrders'),
                 'desc' => $this->l('New P.O.', null, null, false),
@@ -146,7 +154,7 @@ class AdminComponentInventoryInventoryController extends ModuleAdminController
                 'align' => 'center',
                 'class' => 'fixed-width-xs',
                 'search' => false,
-                'callback' => 'renderLinkOnHelperList'
+                'callback' => 'renderDatasheetLinkOnHelperList'
             ],
         ];
 
@@ -436,7 +444,16 @@ class AdminComponentInventoryInventoryController extends ModuleAdminController
     public function renderLinkOnHelperList($link) {
         return '<span class="btn-group-action">
             <span class="btn-group">
-                <a class="btn btn-default" href="'.$link.'" target="_blank"><i class="icon-search-plus"></i>&nbsp;'.$this->l('View').'
+                <a class="btn btn-default" href="'.$link.'" target="_blank"><i class="icon-search-plus"></i>&nbsp;'.$this->l('Part Page').'
+                </a>
+            </span>
+        </span>';
+    }
+
+    public function renderDatasheetLinkOnHelperList($link) {
+        return '<span class="btn-group-action">
+            <span class="btn-group">
+                <a class="btn btn-default" href="'.$link.'" target="_blank"><i class="icon-search-plus"></i>&nbsp;'.$this->l('Datasheet').'
                 </a>
             </span>
         </span>';

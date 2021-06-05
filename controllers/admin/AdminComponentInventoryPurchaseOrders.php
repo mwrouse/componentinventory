@@ -22,12 +22,19 @@ class AdminComponentInventoryPurchaseOrdersController extends ModuleAdminControl
      */
     public function initPageHeaderToolbar()
     {
+        $this->page_header_toolbar_btn['view_db'] = [
+            'href' => 'index.php?controller=AdminComponentInventoryDashboard&token='.Tools::getAdminTokenLite('AdminComponentInventoryDashboard'),
+            'desc' => $this->l('Dashboard', null, null, false),
+            'icon' => 'process-icon-dashboard',
+        ];
+
+        $this->page_header_toolbar_btn['view_inv'] = [
+            'href' => 'index.php?controller=AdminComponentInventoryInventory&token='.Tools::getAdminTokenLite('AdminComponentInventoryInventory'),
+            'desc' => $this->l('View Inventory', null, null, false),
+            'icon' => 'process-icon-view',
+        ];
+
         if (empty($this->display) || $this->display =='list') {
-            $this->page_header_toolbar_btn['view_inv'] = [
-                'href' => 'index.php?controller=AdminComponentInventoryInventory&token='.Tools::getAdminTokenLite('AdminComponentInventoryInventory'),
-                'desc' => $this->l('View Inventory', null, null, false),
-                'icon' => 'process-icon-view',
-            ];
 
             $this->page_header_toolbar_btn['new_po'] = [
                 'href' => static::$currentIndex.'&configure=po&id=new&update'.$this->table.'&token='.$this->token,
@@ -35,6 +42,7 @@ class AdminComponentInventoryPurchaseOrdersController extends ModuleAdminControl
                 'icon' => 'process-icon-cart',
             ];
         }
+
 
         parent::initPageHeaderToolbar();
     }
@@ -249,6 +257,7 @@ class AdminComponentInventoryPurchaseOrdersController extends ModuleAdminControl
 
         return parent::renderForm();
     }
+
 
     /**
      * Generates a specific input type for selecting parts

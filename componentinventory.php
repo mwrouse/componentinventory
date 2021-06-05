@@ -560,6 +560,24 @@ class ComponentInventory extends Module
     }
 
 
+    /**
+     * Returns P.O. Totals for the year to date
+     */
+    public function yearToDatePurchaseOrderTotal()
+    {
+        $qry = (new DbQuery())
+                ->select('SUM(total) as total')
+                ->from($this->table_po)
+                ->where('date_ordered >= '.date('Y').'-01-01');
+
+        $result = Db::getInstance()->ExecuteS($qry);
+        if (!$result)
+            return number_format(0.0, 2);
+
+        return number_format($result[0]['total'], 2);
+    }
+
+
 
     /****************************************
      *       Helper/Utility Functions       *
@@ -611,6 +629,7 @@ class ComponentInventory extends Module
         $allLangs = Language::getLanguages();
         $parentTab = $this->_createSingleTab(0, $name, $this->displayName, $allLangs);
 
+        $dashboardTab = $this->_createSingleTab($parentTab->id, $name.'Dashboard', 'Dashboard', $allLangs);
         $inventoryTab = $this->_createSingleTab($parentTab->id, $name.'Inventory', 'Inventory', $allLangs);
         //$partsTab = $this->_createSingleTab($parentTab->id, $name.'Parts', 'Parts', $allLangs);
         $poTab = $this->_createSingleTab($parentTab->id, $name.'PurchaseOrders', 'Purchase Orders', $allLangs);

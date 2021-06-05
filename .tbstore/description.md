@@ -1,0 +1,1 @@
+Component Inventory allows you to track inventory for things used to make products. These can be parts, components, bags, or anything else.

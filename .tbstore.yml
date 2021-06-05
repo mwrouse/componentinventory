@@ -1,0 +1,19 @@
+module_name: componentinventory
+compatible_versions: 1.0.0+
+author: Michael Rouse
+category: front office
+tags:
+  - inventory
+  - components
+  - products
+description_short: Inventory for parts/components used to make a product
+description: description.md
+images:
+  - image-1.jpg
+license: MIT
+php_version:
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2

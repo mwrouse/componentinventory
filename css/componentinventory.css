@@ -1,0 +1,9 @@
+.icon-AdminComponentInventory::before {
+    content: "\f16b";
+    font-family: "FontAwesome";
+}
+
+.process-icon-view::before {
+    content: "\f06e";
+    font-family: "FontAwesome"
+}

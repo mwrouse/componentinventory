@@ -56,8 +56,13 @@ class AdminComponentInventoryDashboardController extends ModuleAdminController
 
     public function renderList()
     {
+        $ytd_expense = $this->module->yearToDatePurchaseOrderTotal();
+        $ytd_income = $this->module->yearToDateOrderTotal();
+
         $this->context->smarty->assign([
-            'ytd' => $this->module->yearToDatePurchaseOrderTotal(),
+            'ytd_expense' => number_format($ytd_expense, 2),
+            'ytd_income' => number_format($ytd_income, 2),
+            'ytd_net' => number_format($ytd_income - $ytd_expense, 2)
         ]);
 
         $content = $this->context->smarty->fetch(_PS_MODULE_DIR_ .'componentinventory/views/admin/po_summary.tpl');

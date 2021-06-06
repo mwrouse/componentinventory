@@ -17,3 +17,8 @@
     content: "\f013";
     font-family: "FontAwesome";
 }
+
+
+#toolbar-nav li:hover a, #toolbar-nav li:hover a i, #toolbar-nav li:hover a i::before {
+    color: #ff6000 !important;
+}

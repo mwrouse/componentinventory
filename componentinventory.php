@@ -66,7 +66,7 @@ class ComponentInventory extends Module
         if (!isset($productId))
             return "Could not load Product ID from Tools::getValue('id_product')";
 
-        $allParts = $this->getAllParts();
+        $allParts = $this->getAllParts(true);
 
         $parts = $this->getPartsForProduct($productId);
         $this->context->smarty->assign([
@@ -209,7 +209,7 @@ class ComponentInventory extends Module
     /**
      * Returns all of the parts
      */
-    public function getAllParts($alphabetical = false)
+    public function getAllParts($alphabetical = false, $noSort = false)
     {
         $qry = (new DbQuery())
                 ->select('t1.*, t1.`id_part` as `id`, SUM(t2.`qty`) AS qty_on_order')
@@ -217,10 +217,13 @@ class ComponentInventory extends Module
                 ->leftOuterJoin($this->table_po_parts, 't2', 't2.`id_part`=t1.`id_part` AND t2.`received`=0')
                 ->groupBy('t1.`id_part`');
 
-        if (!$alphabetical)
-            $qry = $qry->orderBy('t1.`qty_available` ASC');
-        else
-            $qry = $qry->orderBy('t1.`name` ASC');
+        if (!$noSort)
+        {
+            if (!$alphabetical)
+                $qry = $qry->orderBy('t1.`qty_available` ASC');
+            else
+                $qry = $qry->orderBy('t1.`name` ASC');
+        }
 
         $result = Db::getInstance()->ExecuteS($qry);
 
@@ -572,9 +575,9 @@ class ComponentInventory extends Module
 
         $result = Db::getInstance()->ExecuteS($qry);
         if (!$result)
-            return number_format(0.0, 2);
+            return 0.0;
 
-        return number_format($result[0]['total'], 2);
+        return floatval($result[0]['total']);
     }
 
 
@@ -582,6 +585,31 @@ class ComponentInventory extends Module
     /****************************************
      *       Helper/Utility Functions       *
      ****************************************/
+
+
+    /**
+     * Returns how much has been made in orders this year
+     */
+    public function yearToDateOrderTotal($paypalFees = true)
+    {
+        $qry = (new DbQuery())
+                ->select('total_paid_tax_incl as total')
+                ->from('pp_order_invoice')
+                ->where('date_add >= '.date('Y').'-01-01');
+
+        $result = Db::getInstance()->ExecuteS($qry);
+        if (!$result)
+            return 0.0;
+
+        $total = 0.0;
+        foreach ($result as $order) {
+            if ($order['total'] <= 1)
+                continue;
+
+            $total += (!$paypalFees) ? $order['total'] : (($order['total'] - 0.30) - ($order['total'] * 0.029));
+        }
+        return $total;
+    }
 
 
 

@@ -593,8 +593,8 @@ class ComponentInventory extends Module
     public function yearToDateOrderTotal($paypalFees = true)
     {
         $qry = (new DbQuery())
-                ->select('total_paid_tax_incl as total')
-                ->from('pp_order_invoice')
+                ->select('id_order, current_state, total_paid_tax_incl as total')
+                ->from('pp_orders')
                 ->where('date_add >= '.date('Y').'-01-01');
 
         $result = Db::getInstance()->ExecuteS($qry);
@@ -603,10 +603,15 @@ class ComponentInventory extends Module
 
         $total = 0.0;
         foreach ($result as $order) {
-            if ($order['total'] <= 1)
+            if ($order['total'] <= 1 || $order['current_state'] == 5)
                 continue;
 
-            $total += (!$paypalFees) ? $order['total'] : (($order['total'] - 0.30) - ($order['total'] * 0.029));
+            $o = new Order($order['id_order']);
+            if ($o->hasBeenPaid())
+            {
+                $orderTotal = (!$paypalFees) ? $order['total'] : (($order['total'] - 0.30) - ($order['total'] * 0.029));
+                $total += $orderTotal;
+            }
         }
         return $total;
     }

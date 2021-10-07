@@ -33,19 +33,23 @@ class ComponentInventory extends Module
 
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => '1.6.99.99'];
 
+
         // List of hooks
         $this->hooksList = [
             'displayBackOfficeHeader',
             'displayAdminProductsExtra',
             'actionProductUpdate',
             'actionOrderStatusPostUpdate',
+            'displayComponentInventoryEasyShipButton',
         ];
 
         parent::__construct();
 
+
         $this->displayName = $this->l('Component Inventory');
         $this->description = $this->l('Keep track of component/part inventory');
     }
+
 
 
 
@@ -176,6 +180,110 @@ class ComponentInventory extends Module
         }
 
         $this->markOrderAsHandeled($id_order);
+    }
+
+
+    /**
+     * Add Button For Easy Shipping POs
+     */
+    public function hookDisplayComponentInventoryEasyShipButton($params)
+    {
+        $order = $params['order'];
+
+        // Get PayPal Transaction ID
+        $qry = (new DbQuery())
+                ->select('id_transaction')
+                ->from('paypal_order')
+                ->where('`id_order`='.$order->id);
+        $result = Db::getInstance()->ExecuteS($qry)[0];
+        $paypalLink = 'https://www.paypal.com/activity/payment/'.$result['id_transaction'];
+
+        if ($order->current_state != 2 /* In Progress */)
+            return '&nbsp;<a class="btn btn-default" href="'.$paypalLink.'" target="_blank"><i class="icon-money"></i>&nbsp;PayPal Order</a>'; // Only show PayPal order button
+
+        $this->context->smarty->assign('transaction_link', $paypalLink);
+
+        // Forms for components and expenses
+        $po = [
+            'part_list' => [
+                ['id_part'=>16,'qty'=>-1] /* Shipping Thank You Card */
+            ],
+            'expenses' => []
+        ];
+        $this->context->smarty->assign('components', $this->getInputTypeForPartsInPurchaseOrder($po, true, -1));
+        $this->context->smarty->assign('expenses', $this->getInputTypeForExpensesInPurchaseOrder($po));
+
+        $this->context->smarty->assign('order', $order);
+
+        $link = $this->context->link->getAdminLink('AdminComponentInventoryPurchaseOrders').'&ajax=true&configure=po&updatecomponentinventory_purchase_orders';
+        $this->context->smarty->assign('submitLink', $link);
+
+        return $this->display(__FILE__, 'views/admin/order_button.tpl');
+    }
+
+
+
+
+
+
+    /**********************************
+     *          Form Stuff            *
+     **********************************/
+
+    /**
+     * Generates a specific input type for selecting parts
+     */
+    private function getInputTypeForPartsInPurchaseOrder($po, $microView=false, $qtyDefault=1)
+    {
+        $allParts = $this->getAllParts(true);
+
+        $selectTag = '<select name="parts[]">';
+        $options = "";
+        foreach ($allParts as $part) {
+            $options .= '<option value="'.$part['id_part'].'">'.$part['name'].'</option>';
+        }
+        $selectTag .= $options.'</select>';
+
+        $selectTagStr = str_replace('"', '\\"', $selectTag);
+
+        if (!isset($po) || is_null($po))
+        {
+            $po = [
+                'part_list' => []
+            ];
+        }
+
+        $this->context->smarty->assign([
+            'po' => $po,
+            'parts' => $allParts,
+            'partOptions' => $options,
+            'partsDropdown' => $selectTag,
+            'partsDropdownStr' => $selectTagStr,
+            'microView' => $microView,
+            'qtyDefault' => $qtyDefault,
+        ]);
+
+
+        return $this->context->smarty->fetch(_PS_MODULE_DIR_ .'componentinventory/views/admin/po_parts_list.tpl');
+    }
+
+    /**
+     * Returns input field for expenses
+     */
+    private function getInputTypeForExpensesInPurchaseOrder($po)
+    {
+        if (!isset($po) || is_null($po))
+        {
+            $po = [
+                'expenses' => []
+            ];
+        }
+
+        $this->context->smarty->assign([
+            'po' => $po,
+        ]);
+
+        return $this->context->smarty->fetch(_PS_MODULE_DIR_ .'componentinventory/views/admin/po_expense_list.tpl');
     }
 
 
@@ -607,6 +715,7 @@ class ComponentInventory extends Module
                 continue;
 
             $o = new Order($order['id_order']);
+
             if ($o->hasBeenPaid())
             {
                 $orderTotal = (!$paypalFees) ? $order['total'] : (($order['total'] - 0.30) - ($order['total'] * 0.029));

@@ -311,11 +311,22 @@ class AdminComponentInventoryPurchaseOrdersController extends ModuleAdminControl
         if ($submitPO)
         {
             $id = Tools::getValue('id_po');
+
             if ($id == 'new') {
                 $this->processAddPO();
             }
             else {
                 $this->processUpdatePO($id);
+            }
+
+            // Mark the order as shipped if coming from the order page
+            $markAsShipped = Tools::getValue('ci_markAsShipped', '0') != '0';
+            if ($markAsShipped) {
+                $orderId = Tools::getValue('order_id');
+                $trackingNumber = Tools::getValue('tracking');
+
+                $order = new Order($orderId);
+                $order->setCurrentState(3 /* Shipped */, 1 /* Default Employee */);
             }
         }
         else {
@@ -379,6 +390,12 @@ class AdminComponentInventoryPurchaseOrdersController extends ModuleAdminControl
         }
 
         if (empty($this->_errors)) {
+            if (Tools::getValue('ajax', false) == true)
+            {
+                echo 'done';
+                return;
+            }
+
             if ($saveAndStay) {
                 $this->redirect_after = static::$currentIndex . '&configure=po&id='. $id_po . '&update'.$this->table.'&token=' . $this->token;
             }

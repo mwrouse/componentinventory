@@ -29,8 +29,10 @@
             <tr>
                 <th><strong>Component</strong></th>
                 <th><strong>Qty</strong></th>
-                <th><strong>Total Price</strong></th>
-                <th><strong>Tariffs</strong></th>
+                {if !$microView}
+                    <th><strong>Total Price</strong></th>
+                    <th><strong>Tariffs</strong></th>
+                {/if}
                 <th></th>
             </tr>
         </thead>
@@ -47,12 +49,14 @@
                     <td>
                         <input type="number" name="qty[]" value="{$part['qty']}" onchange="updateOrderTotal()">
                     </td>
-                    <td>
-                        <input type="number" name="price[]" value="{$part['total']}" step="0.01" min="0.0" onchange="updateOrderTotal()">
-                    </td>
-                    <td>
-                        <input type="number" name="tariffs[]" value="{$part['tariff']}" step="0.01" min="0.0" onchange="updateOrderTotal()">
-                    </td>
+                    {if !isset($microView) || !$microView}
+                        <td>
+                            <input type="number" name="price[]" value="{$part['total']}" step="0.01" min="0.0" onchange="updateOrderTotal()">
+                        </td>
+                        <td>
+                            <input type="number" name="tariffs[]" value="{$part['tariff']}" step="0.01" min="0.0" onchange="updateOrderTotal()">
+                        </td>
+                    {/if}
                     <td class="delete">
                          <i class="process-icon-delete" title="Remove Part" onclick="removePart(event)"></i>
                     </td>
@@ -79,17 +83,21 @@
             {$partsDropdownStr} \
         </td> \
         <td> \
-            <input type=\"number\" name=\"qty[]\" value=\"1\"/> \
-        </td> \
-        <td> \
-            <input type=\"number\" name=\"price[]\" value=\"0.0\" step=\"0.01\" min=\"0.0\" onchange=\"updateOrderTotal()\"/> \
-        </td> \
-        <td> \
-            <input type=\"number\" name=\"tariffs[]\" value=\"0.0\" step=\"0.01\" min=\"0.0\" onchange=\"updateOrderTotal()\"/> \
-        </td> \
-        <td class=\"delete\"> \
-            <i class=\"process-icon-delete\" title=\"Remove Part\" onclick=\"removePart(event)\"></i> \
-        </td>";
+            <input type=\"number\" name=\"qty[]\" value=\"{$qtyDefault}\"/> \
+        </td>"
+        {if !$microView}
+            template += "\
+                <td> \
+                    <input type=\"number\" name=\"price[]\" value=\"0.0\" step=\"0.01\" min=\"0.0\" onchange=\"updateOrderTotal()\"/> \
+                </td> \
+                <td> \
+                    <input type=\"number\" name=\"tariffs[]\" value=\"0.0\" step=\"0.01\" min=\"0.0\" onchange=\"updateOrderTotal()\"/> \
+                </td>";
+        {/if}
+        template += "\
+            <td class=\"delete\"> \
+                <i class=\"process-icon-delete\" title=\"Remove Part\" onclick=\"removePart(event)\"></i> \
+            </td>";
 
         var el = document.createElement('tr');
         el.innerHTML = template;
@@ -157,6 +165,9 @@
 
         // Disable the received date once it has already been set
         var received_date = document.querySelector('input[name="date_received"]');
+        if (received_date.type == "hidden")
+            return;
+
         var d = received_date.value;
         if (d != '0000-00-00' && d != '') {
             received_date.setAttribute('disabled', 'true');

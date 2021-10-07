@@ -75,7 +75,7 @@
             <input type=\"number\" name=\"expense_price[]\" value=\"0.0\" step=\"0.01\" min=\"0.0\" onchange=\"updateOrderTotal()\"/> \
         </td> \
         <td class=\"delete\"> \
-            <i class=\"process-icon-delete\" title=\"Remove Part\" onclick=\"removePart(event)\"></i> \
+            <i class=\"process-icon-delete\" title=\"Remove Part\" onclick=\"removeExpense(event)\"></i> \
         </td>";
 
         var el = document.createElement('tr');

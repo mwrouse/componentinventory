@@ -83,7 +83,7 @@ window.addEventListener('load', function(){
         <div class="form-group">
             <label class="control-label col-lg-2">Shipping Cost</label>
             <div class="col-lg-10">
-                <input type="number" id="order-shipping" name="shipping" min="0" step="0.01" style="margin-top: 5px" value="0.00">
+                <input type="number" id="order-shipping" name="shipping" min="0" step="0.01" style="margin-top: 5px" value="0.00" onchange="updateOrderTotal()">
             </div>
         </div>
 
